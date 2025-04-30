@@ -6,6 +6,11 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Responde com uma mensagem quando acessar a raiz
+app.get('/', (req, res) => {
+  res.send('Servidor rodando! Acesse /send-to-discord para enviar mensagens ao Discord.');
+});
+
 // Rota para enviar a mensagem ao Discord
 app.post('/send-to-discord', async (req, res) => {
   const { message } = req.body;
