@@ -1,13 +1,13 @@
+// server.js
 const express = require('express');
-const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
+const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args)); // compatível com Node 18+
 const cors = require('cors');
-
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
-// Webhook do Discord diretamente no código (NÃO RECOMENDADO EM PRODUÇÃO)
+// ATENÇÃO: Não exponha a webhook em produção! Use variável de ambiente no Render!
 const DISCORD_WEBHOOK_URL = 'https://discordapp.com/api/webhooks/1366557827107393608/ziqyGd8ZjfT3llWnKeNXIsDnFQr6XhkqLy-7ASQk7WCL2gMN3IAIe6sx4m0XWm_j5NcX';
 
 app.post('/send-to-discord', async (req, res) => {
@@ -30,12 +30,11 @@ app.post('/send-to-discord', async (req, res) => {
 
     res.sendStatus(200);
   } catch (error) {
-    console.error("Erro ao tentar enviar:", error);
-    res.status(500).send("Erro interno do servidor.");
+    console.error("Erro ao enviar para o Discord:", error);
+    res.status(500).send("Erro interno no servidor.");
   }
 });
 
+// Porta dinâmica (obrigatória para funcionar no Render)
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
-});
+app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
