@@ -1,32 +1,41 @@
 const express = require('express');
-const fetch = require('node-fetch');
+const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
+const cors = require('cors');
+
 const app = express();
 
-// Configura o servidor para aceitar requisições JSON
+app.use(cors());
 app.use(express.json());
 
-// Endpoint GET para ser acessado via URL
-app.get('/send-to-discord', async (req, res) => {
-  // Definindo a mensagem que será enviada para o Discord
-  const message = "Aqui está o token ou mensagem que você quer enviar para o Discord.";
+// Webhook do Discord diretamente no código (NÃO RECOMENDADO EM PRODUÇÃO)
+const DISCORD_WEBHOOK_URL = 'https://discordapp.com/api/webhooks/1366557827107393608/ziqyGd8ZjfT3llWnKeNXIsDnFQr6XhkqLy-7ASQk7WCL2gMN3IAIe6sx4m0XWm_j5NcX';
+
+app.post('/send-to-discord', async (req, res) => {
+  const { message } = req.body;
+
+  if (!message) return res.status(400).send("Mensagem ausente.");
 
   try {
-    // Enviando a mensagem para o Webhook do Discord
-    await fetch('https://discordapp.com/api/webhooks/1366557827107393608/ziqyGd8ZjfT3llWnKeNXIsDnFQr6XhkqLy-7ASQk7WCL2gMN3IAIe6sx4m0XWm_j5NcX', {
+    const response = await fetch(DISCORD_WEBHOOK_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ content: message })
     });
 
-    // Responde para o usuário que a mensagem foi enviada
-    res.send('Mensagem enviada para o Discord!');
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Erro do Discord:", response.status, errorText);
+      return res.status(500).send("Erro ao enviar para o Discord.");
+    }
+
+    res.sendStatus(200);
   } catch (error) {
-    console.error("Erro ao enviar para o Discord:", error);
-    res.sendStatus(500);
+    console.error("Erro ao tentar enviar:", error);
+    res.status(500).send("Erro interno do servidor.");
   }
 });
 
-// Porta do servidor (se Render estiver configurado, usa a porta definida pelo sistema)
-app.listen(process.env.PORT || 3000, () => {
-  console.log("Backend rodando...");
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Servidor rodando na porta ${PORT}`);
 });
